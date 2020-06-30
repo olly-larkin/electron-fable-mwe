@@ -30,8 +30,6 @@ let private loadStateIntoCanvas state model dispatch =
     // Finally load the new state in the canvas.
     let components, connections = state
     List.map model.Diagram.LoadComponent components |> ignore
-    // TODO: disallow inference from running when loading these connections and
-    // run it only once at the end instead?
     List.map (model.Diagram.LoadConnection true) connections |> ignore
     model.Diagram.FlushCommandStack () // Discard all undo/redo.
     // Run the a connection widhts inference.
@@ -85,6 +83,7 @@ let private openFileInProject name project model dispatch =
         // our CurrProj.
         { project with OpenFileName = name }
         |> reloadProjectComponents dispatch |> SetProject |> dispatch
+        dispatch EndSimulation // End any running simulation.
 
 /// Remove file.
 let private removeFileInProject name project model dispatch =
@@ -155,6 +154,7 @@ let private addFileToProject model dispatch =
                 openFileInProject name updatedProject model dispatch
                 // Close the popup.
                 dispatch ClosePopup
+                dispatch EndSimulation // End any running simulation.
         let isDisabled =
             fun (dialogData : PopupDialogData) ->
                 let dialogText = getText dialogData
@@ -163,6 +163,7 @@ let private addFileToProject model dispatch =
 
 /// Close current project, if any.
 let private closeProject model dispatch _ =
+    dispatch EndSimulation // End any running simulation.
     dispatch CloseProject
     model.Diagram.ClearCanvas()
 
@@ -177,6 +178,11 @@ let private newProject model dispatch _ =
             let errMsg = "Could not create a folder for the project."
             displayFileErrorNotification errMsg dispatch
         | Ok _ ->
+            dispatch EndSimulation // End any running simulation.
+            // Create empty placeholder projectFile.
+            let projectFile = basename path + ".dprj"
+            writeFile (pathJoin [|path; projectFile|]) ""
+            // Create empty initial diagram file.
             let initialDiagram = createEmptyDiagramFile path "main"
             // Load the diagram.
             loadStateIntoCanvas initialDiagram.CanvasState model dispatch
@@ -206,6 +212,7 @@ let private openProject model dispatch _ =
                     "main", ([],[])
                 | comp :: _ -> // Pick one file at random to open initally.
                     comp.Name, comp.CanvasState
+            dispatch EndSimulation // End any running simulation.
             loadStateIntoCanvas openFileState model dispatch
             {
                 ProjectPath = path
@@ -232,6 +239,33 @@ let viewNoProjectMenu model dispatch =
     match model.CurrProject with
     | Some _ -> div [] []
     | None -> unclosablePopup None initialMenu None []
+
+let private viewInfoPopup disptach =
+    let makeH h =
+        Text.span [ Modifiers [
+            Modifier.TextSize (Screen.Desktop, TextSize.Is5)
+            Modifier.TextWeight TextWeight.Bold
+        ] ] [str h; br[]]
+    let title = "DEflow Info"
+    let body = div [] [
+        makeH "Version"
+        str "v0.2"
+        br []; br []
+        makeH "Acknowledgments"
+        str "DEflow has been created by Marco Selvatici as his dissertation project."
+        br []; br []
+        makeH "Keyboard shortcuts"
+        str "On Mac use Command instead of Ctrl."
+        ul [] [
+            li [] [str "Save: Ctrl + S"]
+            li [] [str "Copy selected diagram items: Alt + C"]
+            li [] [str "Paste diagram items: Alt + V"]
+            li [] [str "Undo last diagram action: Alt + Z"]
+            li [] [str "Redo last diagram action: Alt + Shift + Z"]
+        ]
+    ]
+    let foot = div [] []
+    closablePopup title body foot [] disptach
 
 /// Display top menu.
 let viewTopMenu model dispatch =
@@ -344,8 +378,8 @@ let viewTopMenu model dispatch =
                 Navbar.Item.div [] [
                     Navbar.Item.div [] [
                         Breadcrumb.breadcrumb [ Breadcrumb.HasArrowSeparator ] [
-                            Breadcrumb.item [] [ str projectPath ]
-                            Breadcrumb.item [] [ str fileName ]
+                            Breadcrumb.item [] [ str <| cropToLength 30 false projectPath ]
+                            Breadcrumb.item [] [ span [Style [FontWeight "bold"]] [str fileName] ]
                         ]
                     ]
                 ]
@@ -360,6 +394,13 @@ let viewTopMenu model dispatch =
                                 SetHasUnsavedChanges false
                                 |> JSDiagramMsg |> dispatch)
                         ] [ str "Save" ]
+                    ]
+                ]
+                Navbar.End.div [] [
+                    Navbar.Item.div [] [
+                        Button.button [
+                            Button.OnClick (fun _ -> viewInfoPopup dispatch)
+                        ] [str "Info"]
                     ]
                 ]
             ]

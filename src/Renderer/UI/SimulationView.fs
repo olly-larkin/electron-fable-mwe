@@ -39,6 +39,7 @@ let private splittedLine leftContent rightConent =
 
 /// Pretty print a label with its width.
 let private makeIOLabel label width =
+    let label = cropToLength 15 true label
     match width with
     | 1 -> label
     | w -> sprintf "%s (%d bits)" label w
@@ -82,7 +83,7 @@ let private viewSimulationInputs
                                 errorNotification err CloseSimulationNotification
                                 |> SetSimulationNotification |> dispatch
                             | Ok num ->
-                                let bits = convertIntToWireData num width
+                                let bits = convertIntToWireData width num
                                 // Close simulation notifications.
                                 CloseSimulationNotification |> dispatch
                                 // Feed input.
@@ -132,8 +133,7 @@ let private viewStatefulComponents comps numBase model dispatch =
             let label = sprintf "DFF: %s" <| getWithDefault comp.Label
             [ splittedLine (str label) (staticBitButton bit) ]
         | RegisterState bits ->
-            let getWidth compType = match compType with Register w -> w | _ -> failwithf "what? viewStatefulComponents expected Register component but got: %A" compType 
-            let label = sprintf "Register: %s (%d bits)" (getWithDefault comp.Label) (getWidth comp.Type)
+            let label = sprintf "Register: %s (%d bits)" (getWithDefault comp.Label) bits.Length
             [ splittedLine (str label) (staticNumberBox numBase bits) ]
         | RamState mem ->
             let label = sprintf "RAM: %s" <| getWithDefault comp.Label
@@ -187,8 +187,9 @@ let private viewSimulationData (simData : SimulationData) model dispatch =
                 Button.Color IsSuccess
                 Button.OnClick (fun _ ->
                     feedClockTick simData.Graph |> SetSimulationGraph |> dispatch
+                    IncrementSimulationClockTick |> dispatch
                 )
-            ] [ str "Clock Tick" ]
+            ] [ str <| sprintf "Clock Tick %d" simData.ClockTickNumber ]
     let maybeStatefulComponents =
         let stateful = extractStatefulComponents simData.Graph
         match List.isEmpty stateful with

@@ -185,6 +185,15 @@ function createDigitalDemux2(x, y) {
     return new draw2d.shape.digital.Demux2({x:x,y:y,resizeable:false});
 }
 
+function createDigitalNbitsAdder(x, y, numberOfBits) {
+    return new draw2d.shape.digital.NbitsAdder({
+        x:x,
+        y:y,
+        resizeable:false,
+        numberOfBits:numberOfBits
+    });
+}
+
 function createDigitalCustom(x, y, name, inputs, outputs) {
     return new draw2d.shape.digital.Custom({
         x: x,
@@ -215,6 +224,15 @@ function createDigitalDFFE(x, y) {
 
 function createDigitalRegister(x, y, regWidth) {
     return new draw2d.shape.digital.Register({
+        x: x,
+        y: y,
+        regWidth: regWidth,
+        resizeable: false
+    });
+}
+
+function createDigitalRegisterE(x, y, regWidth) {
+    return new draw2d.shape.digital.RegisterE({
         x: x,
         y: y,
         regWidth: regWidth,
@@ -265,13 +283,14 @@ function writeMemoryLine(comp, addr, value) {
     comp.memData[addr] = value;
 }
 
-/// Should only be used for Input and Output nodes.
-function setNumberOfIOBits(comp, numberOfBits) {
+/// Should only be used for Input, Output and NbitsAdder components.
+function setNumberOfBits(comp, numberOfBits) {
     if (comp.numberOfBits == null || comp.numberOfBits === "undefined") {
-        throw `Cannot set number of bits of non-IO component: ${comp.componentType}`;
+        throw `Cannot set number of bits of component: ${comp.componentType}`;
     }
     comp.numberOfBits = numberOfBits;
     dispatchInferWidthsMessage();
+    comp.setSVG(comp.getSVG()); // Refresh svg.
 }
 
 /// Should only be used for SplitWire nodes.
@@ -397,18 +416,20 @@ export {
     createDigitalXnor,
     createDigitalMux2,
     createDigitalDemux2,
+    createDigitalNbitsAdder,
     createDigitalCustom,
     createDigitalMergeWires,
     createDigitalSplitWire,
     createDigitalDFF,
     createDigitalDFFE,
     createDigitalRegister,
+    createDigitalRegisterE,
     createDigitalAsyncROM,
     createDigitalROM,
     createDigitalRAM,
     createDigitalConnection,
     writeMemoryLine,
-    setNumberOfIOBits,
+    setNumberOfBits,
     setTopOutputWidth,
     setRegisterWidth,
     updateMergeWiresLabels,

@@ -55,18 +55,20 @@ type private IDraw2d =
     abstract createDigitalXnor            : x:int -> y:int -> JSComponent
     abstract createDigitalMux2            : x:int -> y:int -> JSComponent
     abstract createDigitalDemux2          : x:int -> y:int -> JSComponent
+    abstract createDigitalNbitsAdder      : x:int -> y:int -> numberOfBits:int -> JSComponent
     abstract createDigitalCustom          : x:int -> y:int -> name:string -> inputs:obj -> outputs:obj -> JSComponent
     abstract createDigitalMergeWires      : x:int -> y:int -> JSComponent
     abstract createDigitalSplitWire       : x:int -> y:int -> topOutputWidth:int -> JSComponent
     abstract createDigitalDFF             : x:int -> y:int -> JSComponent
     abstract createDigitalDFFE            : x:int -> y:int -> JSComponent
     abstract createDigitalRegister        : x:int -> y:int -> regWidth:int -> JSComponent
+    abstract createDigitalRegisterE       : x:int -> y:int -> regWidth:int -> JSComponent
     abstract createDigitalAsyncROM        : x:int -> y:int -> addressWidth:int -> wordWidth:int -> memData:'jsInt64List -> JSComponent
     abstract createDigitalROM             : x:int -> y:int -> addressWidth:int -> wordWidth:int -> memData:'jsInt64List -> JSComponent
     abstract createDigitalRAM             : x:int -> y:int -> addressWidth:int -> wordWidth:int -> memData:'jsInt64List -> JSComponent
     abstract createDigitalConnection      : source:JSPort -> target:JSPort -> JSConnection
     abstract writeMemoryLine              : comp:JSComponent -> addr:int -> value:int64 -> unit
-    abstract setNumberOfIOBits            : comp:JSComponent -> numberOfBits:int -> unit
+    abstract setNumberOfBits              : comp:JSComponent -> numberOfBits:int -> unit
     abstract setTopOutputWidth            : comp:JSComponent -> topOutputWidth: int -> unit
     abstract setRegisterWidth             : comp:JSComponent -> topOutputWidth: int -> unit
     abstract updateMergeWiresLabels       : comp:JSComponent -> topInputWidth:int option -> bottomInputWidth:int option -> outputWidth:int option -> unit
@@ -125,6 +127,7 @@ let private createComponent
         | Xnor   -> draw2dLib.createDigitalXnor x y
         | Mux2   -> draw2dLib.createDigitalMux2 x y
         | Demux2 -> draw2dLib.createDigitalDemux2 x y
+        | NbitsAdder numberOfBits -> draw2dLib.createDigitalNbitsAdder x y numberOfBits
         | ComponentType.Custom custom ->
             draw2dLib.createDigitalCustom
                 x y custom.Name (fshaprListToJsList custom.InputLabels)
@@ -133,7 +136,8 @@ let private createComponent
         | SplitWire topWireWidth -> draw2dLib.createDigitalSplitWire x y topWireWidth
         | DFF  -> draw2dLib.createDigitalDFF x y
         | DFFE -> draw2dLib.createDigitalDFFE x y
-        | Register width -> draw2dLib.createDigitalRegister x y width
+        | Register  width -> draw2dLib.createDigitalRegister x y width
+        | RegisterE width -> draw2dLib.createDigitalRegisterE x y width
         | AsyncROM mem ->
             draw2dLib.createDigitalAsyncROM
                 x y mem.AddressWidth mem.WordWidth (fshaprListToJsList mem.Data)
@@ -188,9 +192,11 @@ let private editComponentLabel (canvas : JSCanvas) (id : string) (newLabel : str
     let jsComponent = draw2dLib.getComponentById canvas id
     if isNull jsComponent
     then failwithf "what? could not find diagram component with Id: %s" id
-    else jsComponent?children?data?(0)?figure?setText(newLabel) // TODO: this only works for labels and it is very hacky.
+    else jsComponent?children?data?(0)?figure?setText(newLabel)
 
 // React wrapper.
+
+type DisplayModeType = Hidden | VisibleSmall | VisibleLarge
 
 type private Draw2dReactProps = {
     Dispatch : JSDiagramMsg -> unit
@@ -208,8 +214,9 @@ type private Draw2dReact(initialProps) =
 
     override this.render() =
         let style = match this.props.DisplayMode with
-                    | DisplayModeType.Hidden -> canvasHiddenStyle
-                    | DisplayModeType.Visible -> canvasVisibleStyle
+                    | Hidden -> canvasHiddenStyle
+                    | VisibleSmall -> canvasVisibleStyleS
+                    | VisibleLarge -> canvasVisibleStyleL
         div [ Id divId; style ] []
 
 let inline private createDraw2dReact props = ofType<Draw2dReact,_,_> props []
@@ -383,11 +390,11 @@ type Draw2dWrapper() =
             draw2dLib.writeMemoryLine jsComp addr value
         |> tryActionWithCanvas "WriteMemoryLine"
 
-    member this.SetNumberOfIOBits compId numberOfBits =
+    member this.SetNumberOfBits compId numberOfBits =
         fun c ->
             let jsComp = assertNotNull (draw2dLib.getComponentById c compId) "SetNumberOfBits"
-            draw2dLib.setNumberOfIOBits jsComp numberOfBits
-        |> tryActionWithCanvas "SetNumberOfIOBits"
+            draw2dLib.setNumberOfBits jsComp numberOfBits
+        |> tryActionWithCanvas "SetNumberOfBits"
 
     member this.SetTopOutputWidth compId topOutputWidth =
         fun c ->
