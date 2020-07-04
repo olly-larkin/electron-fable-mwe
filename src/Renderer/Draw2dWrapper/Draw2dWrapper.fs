@@ -185,7 +185,7 @@ let private createConnection
     //
     // FIX - set vertices BEFORE adding connection to canvas. Does not
     // seem to be a problem.
-    vertices.[1..vertices.Length-2]
+    vertices
     |> List.map (fun (x, y) -> createObj ["x" ==> x; "y" ==> y])
     |> fshaprListToJsList
     |> draw2dLib.setConnectionVertices conn
