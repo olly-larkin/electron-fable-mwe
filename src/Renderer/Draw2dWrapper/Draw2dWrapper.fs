@@ -175,18 +175,21 @@ let private createConnection
     match maybeId with
     | None -> ()
     | Some id -> draw2dLib.setConnectionId conn id
-    draw2dLib.addConnectionToCanvas canvas conn
+    //draw2dLib.addConnectionToCanvas canvas conn
     // TODO: Setting vertices seems to break stuff, not sure why.
     // It is highly likely this is a bug in the draw2d library, and it has been
     // reported: https://github.com/freegroup/draw2d/issues/115
     // When fixed, just uncomment the below logic.
-
     // Vertices must be set only once the connection is already in the the
     // canvas, i.e. after the connection has been actually routed.
-    //vertices
-    //|> List.map (fun (x, y) -> createObj ["x" ==> x; "y" ==> y])
-    //|> fshaprListToJsList
-    //|> draw2dLib.setConnectionVertices conn
+    //
+    // FIX - set vertices BEFORE adding connection to canvas. Does not
+    // seem to be a problem.
+    vertices.[1..vertices.Length-2]
+    |> List.map (fun (x, y) -> createObj ["x" ==> x; "y" ==> y])
+    |> fshaprListToJsList
+    |> draw2dLib.setConnectionVertices conn
+    draw2dLib.addConnectionToCanvas canvas conn
 
 let private editComponentLabel (canvas : JSCanvas) (id : string) (newLabel : string) : unit =
     let jsComponent = draw2dLib.getComponentById canvas id

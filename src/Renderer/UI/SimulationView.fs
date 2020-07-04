@@ -23,6 +23,7 @@ open SimulatorTypes
 open Extractor
 open Simulator
 open NumberHelpers
+open WaveformView
 
 let changeBase dispatch numBase = numBase |> SetSimulationBase |> dispatch
 
@@ -248,6 +249,10 @@ let viewSimulation model dispatch =
             Button.button
                 [ Button.Color IsSuccess; Button.OnClick (fun _ -> startSimulation()) ]
                 [ str "Start simulation" ]
+        
+            Button.button [
+                            Button.OnClick (fun _ -> openWaveformViewer [] [] dispatch)
+                        ] [str "SVG"]
         ]
     | Some sim ->
         let body = match sim with
