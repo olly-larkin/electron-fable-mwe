@@ -24,6 +24,7 @@ The choice of F# as main programming language for the app has been dictated by a
 
 ## Project Structure
 
+
 Electron bundles Chromium (View) and node.js (Engine), therefore as in every node.js project, the `package.json` file specifies the (Node) module dependencies.
 
 * dependencies: node libraries that the executable code (and development code) needs
