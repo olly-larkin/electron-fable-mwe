@@ -18,9 +18,7 @@ let argFlagIsOn (flags:string list) =
     let fl = List.map (fun (s:string) -> s.ToLower()) flags
     List.exists (fun flag -> List.contains flag args) fl
 
-let hasDebugArgs() = argFlagIsOn ["--debug";"-d"]
-
-let debug = false
+let debug = argFlagIsOn ["--debug";"-d"]
 
 module DevTools =
     let private installDevTools (extensionRef: obj) (forceDownload: bool): JS.Promise<string> =
@@ -48,12 +46,10 @@ module DevTools =
         main.Session.defaultSession.removeExtension("Redux DevTools")
         win.webContents.executeJavaScript ("require('devtron').uninstall()")
         
-
     let connectRemoteDevViaExtension: unit -> unit = import "connectViaExtension" "remotedev"
 
 
-electron.app.name <- "Issie"
-
+electron.app.name <- "electron-fable-mwe"
 
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -90,15 +86,12 @@ let createMainWindow () =
         if window.isMinimized() then window.show()
         options.backgroundColor <- "#505050"
         window.focus()
-    |> ignore
-
-    // Load the index.html of the app.    
+    |> ignore 
 
     let isDev = (``process``?defaultApp = true)
 
     if isDev then
         DevTools.installAllDevTools window
-        //DevTools.connectRemoteDevViaExtension()
 
         if debug then
             window.webContents.openDevTools()
@@ -109,8 +102,6 @@ let createMainWindow () =
 
         ``process``.on("uncaughtException", fun err -> JS.console.error(err))
         |> ignore
-
-    
     else
         let url =
             path.join ( __dirname,  "index.html")
@@ -121,7 +112,6 @@ let createMainWindow () =
         |> window.loadURL
         |> ignore
    
-    
     // Emitted when the window is closed.
     window.onClosed <| fun _ ->
         // Dereference the window object, usually you would store windows
