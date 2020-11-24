@@ -1,34 +1,11 @@
-# Issie - an Interactive Schematic Simulator with Integrated Editor
-
-Issie (Interactive Schematic Simulator with Integrated Editor) is an application for digital circuit design and simulation. It is targeted at students and hobbyists that want to get a grasp of Digital Electronics concepts in a simple and fun way. Issie is designed to be beginner-friendly and guide the users toward their goals via clear error messages and visual clues.
-
-The application is was initially developed by Marco Selvatici, as a Final Year Project.
-
-The interactive waveform simulator was developed by Edoardo Santi over a Summer UROP.
-
-It is currently being maintained and developed by Tom Clarke (owner). 
-
-If you are just interested in using the application, jump to the [Getting Started](#getting-started) section. For more info about the project, read on.
-
-This documentation is partly based on the excellent [VisUAL2](https://github.com/ImperialCollegeLondon/Visual2) documentation, given the similarity in the technology stack used.
+# An Electron-Fable3 Minimum Framework
 
 ## Introduction
-
-For the Issie website go [here](https://tomcl.github.io/issie/).
 
 The application is mostly written in F#, which gets transpiled to JavaScript via the [Fable](https://fable.io/) compiler. [Electron](https://www.electronjs.org/) is then used to convert the developed web-app to a cross-platform application. [Electron](electronjs.org) provides access to platform-level APIs (such as access to the file system) which would not be available to vanilla browser web-apps.
 
 [Webpack 4](https://webpack.js.org/) is the module bundler responsible for the JavaScript concatenation and automated building process: the electron-webpack build 
 is automated with the all-in-one electron-webpack package.
-
-The drawing capabilities are provided by the [draw2d](http://www.draw2d.org/draw2d/) JavaScript library, which has been extended to support digital electronics components.
-
-The choice of F# as main programming language for the app has been dictated by a few factors:
-
-* The success of the [VisUAL2](https://github.com/ImperialCollegeLondon/Visual2), which uses a similar technology stack;
-* Strongly typed functional code tends to be easy to maintain and test, as the type-checker massively helps you;
-* Imperial College EEE/EIE students learn such language in the 3rd year High-Level-Programming course, hence can maintain the app in the future;
-* F# can be used with the powerful [Elmish](https://elmish.github.io/elmish/) framework to develop User Interfaces in a [Functional Reactive Programming](https://en.wikipedia.org/wiki/Functional_reactive_programming) fashion.
 
 ## Project Structure
 
@@ -83,8 +60,6 @@ The `src/Main/Main.fs` source configures electron start-up and is boilerplate. I
 
 The remaining app code is arranged in four different sections, each being a separate F# project. This separation allows all the non-web-based code (which can equally be run and tested under .Net) to be run and tested under F# directly in addition to being transpiled and run under Electron.
 
-The project relies on the draw2d JavaScript (node) library, which is extended to support digital electronics components. The extensions are in the `draw2d` sub-folder of the renderer project source files. 
-
 The code that turns the F# project source into `renderer.js` is the FABLE compiler followed by the Node Webpack bundler that combines multiple Javascript files into a single `renderer.js`.
 
 The compile process is controlled by the `.fsproj` files (defining the F# source) and `webpack.additions.main.js`, `webpack.additions.renderer.js`
@@ -98,29 +73,15 @@ This is boilerplate which you do not need to change; normally the F# project fil
 |   Subfolder   |                                             Description                                            |
 |:------------:|:--------------------------------------------------------------------------------------------------:|
 | `main/` | Code for the main electron process that sets everything up - not normally changed |
-| `Common/`       | Provides some common types and utilities used by all other sections, including the  WidthInferer |
-| `Simulator/`    | Contains the logic to analyse and simulate a diagram.                                              |
-| `Renderer/`     | Contains the UI logic, the wrapper to the JavaScript drawing library and a set of utility function to write/read/parse diagram files. This amd `main` are the only projects that cannot run under .Net, as they contain JavaScript related functionalities. |
+| `Renderer/`     | Contains the UI logic |
 
 ### `Tests` folder
 
-Contains numerous tests for the WidthInferer and Simulator. Based on F# Expecto testing library.
-
+Contains all tests.
 
 ### `Static` folder
 
-Contains static files used in the application.
-
-### `Docs` folder
-
-Contains source information copied (or compiled) into the `docs` directory that controls the project 
-[Github Pages](https://pages.github.com/) website, with url [https://tomcl.github.io/issie/](https://tomcl.github.io/issie/).
-
-## Project versus File in the Issie application
-
-Issie allows the users to create projects and files within those projects. A Issie project is simply a folder named `<project-name>` that contains an empty file named `<project_name>.dprj` (dprj stands for diagram project). The project folder any non-zero number of design files, each named `<component_name>.dgm` (dgm stands for diagram). each deisgn file represents one design sheet of a hierarchical hardware design, sheets can contain, as components, other sheets.
-
-When opening a project, Issie will initially search the given repository for `.dgm` files, parse and load their content, and allow the user to open them in Issie or use them as components in other designs.
+Contains static files used in the application.  
 
 ## Build Magic
 
@@ -135,14 +96,7 @@ This project uses modern F# / dotnet cross-platform build. The build process doe
 * Next all the project Dotnet dependencies (`paket.dependencies` for the whole project, selected from by the `paket.references` in each project directory, are loaded by the `paket` packet manager.
 * Finally fake runs `build.fsx` (this is platform-independent) which uses `npm` to install all the node (Javascript) dependencies listed in `package.json`. That includes tools like webpack and electron, which run under node, as well as the node libraries that will be used by needed by the running electron app, including electron itself. These are all loaded by the `npm` packet manager. 
 
-## Getting Started
-
-If you just want to run the app go to the [releases page](https://github.com/tomcl/issie/releases) and follow the instructions on how to 
-download and run the prebuilt binaries. Note that the Windows binary will run on Linux under WINE.
-
-If you want to get started as a developer, follow these steps.
-
-### Install Prerequisites
+## Install Prerequisites
 
 Download and install (if you already have these tools installed just check the version constraints).
 
@@ -154,34 +108,9 @@ Download and install (if you already have these tools installed just check the v
     * Node.js includes the `npm` package manager, so this does not need to be installed separately.
     * The lastest LTS version of Node is now v14. That will almost certainly also work.
 
-### Issie Development
-
-1. Download & unzip the [Issie repo](https://github.com/tomcl/ISSIE), or if contributing clone it locally, or fork it on github and then clone it locally.
-
-3. Navigate to the project root directory (which contains this README) in a command-line interpreter. For Windows usage make sure if possible for convenience 
-that you have a _tabbed_ command-line interpreter that can be started direct from file explorer within a specific directory (by right-clicking on the explorer directory view). 
-That makes things a lot more pleasant. The new [Windows Terminal](https://github.com/microsoft/terminal) works well.
-
-4. Run `build.cmd` under Windows or `build.sh` under linux or macos. This will download and install all dependencies then launch the application with HMR.
-  
-  * HMR: the application will automatically recompile and update while running if you save updated source files
-  * To initialise and reload: `File -> reload page`
-  * To exit: after you exit the application the auto-compile script will terminate after about 15s
-  * To recompile the application `npm run dev`.
-  * To generate distributable binaries for dev host system `npm run dist`.
-  * If you have changed node modules use `build dev`. Note that this project uses npm, not yarn. If npm gets stuck use `build cleannode` and try again.
-  * From time to time run `build killzombies` to terminate orphan node and dotnet processes which accumulate using this dev chain.
-
-
 ## Reinstalling Compiler and Libraries
 
 To reinstall the build environment (without changing project code) rerun `build.cmd` (Windows) or `build.sh` (Linux and MacOS). You may need first to
 run `build killzombies` to remove orphan processes that lock build files.
 
-## TODO
-
-* Incorporate zombie process killing into the build scripts to make manual run unnecessary. Requires care.
-* Should Node be upgraded to v14?
-* Remove source map support? Depends on whether Fable 3 will integrate it.
-* Clean up Paket dependencies
 
