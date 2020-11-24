@@ -3,10 +3,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Common/Common.fsproj" />
-    <ProjectReference Include="../Simulator/Simulator.fsproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Interface/JSHelpers.fs" />
     <Compile Include="Types/ModelType.fs" />
     <Compile Include="Renderer.fs" />

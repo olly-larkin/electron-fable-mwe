@@ -4,10 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../src/Common/Common.fsproj" />
-    <ProjectReference Include="../src//Simulator/Simulator.fsproj" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="TestLib.fs" />
     <Compile Include="Tests.fs" />
   </ItemGroup>
