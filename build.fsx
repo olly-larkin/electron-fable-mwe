@@ -59,7 +59,7 @@ Target.create "DistDir" (fun _ ->
 )
 
 Target.create "KillZombies" <| fun _ ->
-    Fake.Core.Process.killAllByName "issie.exe"
+    Fake.Core.Process.killAllByName "electron-fable-mwe.exe"
     Fake.Core.Process.killAllByName "node"
     Fake.Core.Process.killAllByName "dotnet"
 

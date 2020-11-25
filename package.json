@@ -10,8 +10,8 @@
     "url": "https://github.com/olly-larkin/electron-fable-mwe"
   },
   "scripts": {
-    "clean-dev-mac": "sudo killall -9 node && sudo killall -9 dotnet && sudo killall -9 issie",
-    "clean-dev-win": "taskkill /f /im node.exe && taskkill /f /im dotnet.exe && taskkill /f /im issie.exe",
+    "clean-dev-mac": "sudo killall -9 node && sudo killall -9 dotnet && sudo killall -9 electron-fable-mwe",
+    "clean-dev-win": "taskkill /f /im node.exe && taskkill /f /im dotnet.exe && taskkill /f /im electron-fable-mwe.exe",
     "compile": "dotnet fable src/main && dotnet fable src/renderer",
     "dev": "cd src/main && dotnet fable watch . --run npm run devrenderer",
     "devmain": "cd src/main && dotnet fable watch . --run npm run webpackdev",
