@@ -1,17 +1,13 @@
 {
-  "name": "issie",
-  "version": "1.0.7",
-  "description": "Schematic editor and Simulator",
-  "homepage": "https://github.com/tomcl/issie",
-  "bugs": {
-    "url": "https://github.com/tomcl/issie/issues"
-  },
+  "name": "electron-fable-mwe",
+  "version": "1.0.0",
+  "description": "Close to minimum framework for electron fable3 using elmish",
   "license": "",
-  "author": "tomcl",
+  "author": "ollyl",
   "main": "app/main.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tomcl/issie.git"
+    "url": "https://github.com/olly-larkin/electron-fable-mwe"
   },
   "scripts": {
     "clean-dev-mac": "sudo killall -9 node && sudo killall -9 dotnet && sudo killall -9 issie",
