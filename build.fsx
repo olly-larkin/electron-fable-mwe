@@ -35,7 +35,7 @@ Target.create "CleanNode" <| fun _ ->
 Target.create "DotnetRestore" (fun _ ->
   DotNet.restore
     (DotNet.Options.withWorkingDirectory __SOURCE_DIRECTORY__)
-    "issie.sln"
+    "electron-fable-mwe.sln"
 )
 
 Target.create "NpmInstall" (fun _ ->
